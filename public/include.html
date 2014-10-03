@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <script src="jquery.js"></script>
+    <script src="piemodel.js"></script>
+    <script>
+        $(function() {
+            var pm = new PieChartModel([{name: "a", value: 50}, {name: "b", value: 50}]);
+            $(pm).on("pieChanged", function() {
+                $(".result").html($(".result").html() + "<br> Pie model changed event");
+            });
+            var history = new PieChartHistory(pm);
+            var canUndo1 = history.canUndo();
+            pm.setAngleEnd(pm.items[0], Math.PI / 2);
+            var canUndo2 = history.canUndo();
+            var newVal2 = pm.items[1].value;
+            $(".result").html($(".result").html() + "<ul>" +
+                    "<li>canUndo1 = " + canUndo1 + "</li>" +
+                    "<li>value2 = " + newVal2+ "</li>" +
+                    "<li>canUndo2 = " + canUndo2 + "</li>" +
+                    "</ul>")
+
+        });
+    </script>
+</head>
+<body>
+    <div class="result"></div>
+</body>
+</html>
