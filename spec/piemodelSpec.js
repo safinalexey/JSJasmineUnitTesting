@@ -10,7 +10,66 @@
 //    });
 //});
 
-describe("A spec testing PieChartModel getItems() function", function () {
+xdescribe("A spy", function() {
+    var pm;
+    var spy;
+
+    beforeEach(function() {
+        pm = new PieChartModel([
+            {name: "a", value: 100}
+        ]);
+
+//        spyOn(pm, 'setValue');
+        spy = jasmine.createSpyObj('ChangeAllStrategy', ['setValue']);
+
+        spy.setValue(pm.items[0], 24.9, pm.items[0])
+    });
+
+    xit("tracks all the arguments of its calls", function() {
+        expect(spy.setValue).toBeDefined();
+    });
+
+});
+
+describe("ChangeAllStrategy setValue() function", function(){
+    var casinputArray;
+    var cas;
+
+    beforeEach(function(){
+        casinputArray = [{id:1, value: 2}, 3, [{id:1, value: 2},{id:2, value: 4}]];
+
+        cas = ChangeAllStrategy.setValue(casinputArray[0],casinputArray[1],casinputArray[2]);
+    });
+
+    it('must change first param', function(){
+        expect(casinputArray[0]).not.toEqual({id:1, value: 2})
+    });
+
+    it('must change third param', function(){
+        expect(casinputArray[2]).not.toEqual([{id:1, value: 2},{id:2, value: 4}])
+    });
+});
+
+describe("ChangeNeighborsStrategy setValue() function", function(){
+    var cnsinputArray;
+    var cns;
+
+    beforeEach(function(){
+        cnsinputArray = [{id:1, value: 2}, 3, [{id:1, value: 2},{id:2, value: 4}]];
+
+        cns = ChangeNeighborsStrategy.setValue(cnsinputArray[0],cnsinputArray[1],cnsinputArray[2]);
+    });
+
+    it('must change first param', function(){
+        expect(cnsinputArray[0].value).toEqual(3)
+    });
+
+//    it('that must change some inputs', function(){
+//        expect(cnsinputArray[2][1].value).toEqual(4)
+//    });
+});
+
+xdescribe("A spec testing PieChartModel getItems() function", function () {
 
     it("with correct input", function () {
         var pmCorrectInput = new PieChartModel([
@@ -105,275 +164,259 @@ describe("A spec testing PieChartModel getItems() function", function () {
     });
 });
 
+xdescribe("A spec testing PieChartModel setAngleEnd() function", function () {
 
-    describe("A spec testing PieChartModel setAngleEnd() function", function () {
+    var pm, items, fired;
 
-        var pm = new PieChartModel([
+    beforeEach(function(){
+        pm = new PieChartModel([
             {name: "a", value: 43},
             {name: "b", value: 38},
             {name: "c", value: 15}
         ]);
-
-        var items = pm.getItems();
-        pm.setAngleEnd(items[1], 3);
-        var fired = false;
+        items = pm.getItems();
+        fired = false;
         $(pm).on('pieChanged', function () {
             fired = true;
         });
-
-        it("with correct input more than angStart", function () {
-            var pm = new PieChartModel([
-                {name: "a", value: 43},
-                {name: "b", value: 38},
-                {name: "c", value: 15}
-            ]);
-
-            var items = pm.getItems();
-            pm.setAngleEnd(items[1], 3);
-            expect(items[0].angEnd).toEqual(3)
-        });
-
-        it("with incorrect index, must fall", function () {
-            var pm = new PieChartModel([
-                {name: "a", value: 43},
-                {name: "b", value: 38},
-                {name: "c", value: 15}
-            ]);
-
-            var items = pm.getItems();
-            pm.setAngleEnd(items[1], 3);
-            expect(items[0].angEnd).toEqual(3)
-        });
-
-
-        it("with correct input less than angStart", function () {
-            var pm = new PieChartModel([
-                {name: "a", value: 43},
-                {name: "b", value: 38},
-                {name: "c", value: 15}
-            ]);
-
-            var items = pm.getItems();
-            pm.setAngleEnd(items[0], 2);
-
-            expect(items[0].angEnd).toEqual(2)
-        });
-
-        pm.setAngleEnd(items[1], 0);
-
-        it("with zero angle input", function () {
-            var pm = new PieChartModel([
-                {name: "a", value: 43},
-                {name: "b", value: 38},
-                {name: "c", value: 15}
-            ]);
-
-            var items = pm.getItems();
-            pm.setAngleEnd(items[0], 0);
-
-            expect(items[0].angEnd).toEqual(0)
-        });
-
-        it("that fires pieChanged event", function () {
-            expect(fired).toBeTruthy()
-        })
     });
 
-    describe("A spec testing PieChartModel changeStrategy() function", function () {
-        pmToChgStr = new PieChartModel([
-            {name: "a", value: 43},
-            {name: "b", value: 38},
-            {name: "c", value: 15}
-        ]);
-
-        it("with null input", function () {
-            expect(function () {pmToChgStr.changeStrategy(null)}).toThrow()
-        });
-
-        var MyStrategy;
-
-        it("with strategy !setValue input", function () {
-            expect(function () {pmToChgStr.changeStrategy(MyStrategy)}).toThrow();
-        })
-
-
-        newPm = new PieChartModel([
-            {name: "a", value: 43},
-            {name: "b", value: 38},
-            {name: "c", value: 15}
-        ]);
-        newPm.changeStrategy(ChangeNeighborsStrategy)
-        it("change to ChangeNeighborsStrategy", function () {
-            expect(newPm._changeStrategy).toBe(ChangeNeighborsStrategy);
-        })
-
-        newPmToChgStr = new PieChartModel([
-            {name: "a", value: 43},
-            {name: "b", value: 38},
-            {name: "c", value: 15}
-        ]);
-        newPmToChgStr.changeStrategy(ChangeNeighborsStrategy)
-        newPmToChgStr.changeStrategy(ChangeAllStrategy)
-        it("change to ChangeAllStrategy", function () {
-            expect(newPmToChgStr._changeStrategy).toBe(ChangeAllStrategy);
-        })
+    it("setValue() toHaveBeenCalledWith test", function(){
+        spyOn(pm._changeStrategy, 'setValue');
+        pm.setAngleEnd(items[1], 3);
+        expect(pm._changeStrategy.setValue).toHaveBeenCalledWith(items[1],2.954816260901937,items)
     });
 
-    describe("A spec testing PieChartModel remove() function", function () {
-
-        var pmRm = new PieChartModel([
-            {name: "a", value: 43},
-            {name: "b", value: 38},
-            {name: "c", value: 15}
-        ]);
-        var pmRmItems = pmRm.getItems();
-        pmRm.remove(pmRmItems[0]);
-
-        it("remove() deletes properly", function () {
-            expect(pmRmItems[0].deleted).toBeTruthy()
-        });
-
-        pmRm.remove(pmRmItems[0]);
-        it("remove() doesn't change anything if element was already deleted", function () {
-            expect(pmRmItems[0].deleted).toBeTruthy()
-        });
+    it("with correct input more than angStart", function () {
+        pm.setAngleEnd(items[1], 3);
+        expect(items[0].angEnd).toEqual(3)
     });
 
-    describe("A spec testing PieChartModel reset() function", function () {
-
-        var pmRs = new PieChartModel([
-            {name: "a", value: 43},
-            {name: "b", value: 38},
-            {name: "c", value: 15}
-        ]);
-        var pmRsItems = pmRs.getItems();
-        var ResetFired;
-        pmRs.remove(pmRsItems[0]);
-        $(pmRs).on('pieChanged', function () {
-            ResetFired = true;
-        });
-        pmRs.reset();
-
-        var sum = pmRsItems[1].value + pmRsItems[2].value
-
-        it("reset() sets all items' values to equal values", function () {
-            expect(pmRsItems[1].value).toEqual(pmRsItems[2].value)
-        });
-
-        it("reset() sets all items' values to equal values with sum 100", function () {
-            expect(sum).toEqual(100)
-        });
-
-        var pmSE = new PieChartModel([
-            {name: "a", value: 43}
-        ]);
-        var pmSEitems = pmSE.getItems();
-        pmSE.remove(pmSEitems[0]);
-        pmSE.reset()
-        it("reset() does nothing to single element that was deleted", function () {
-            expect(pmSEitems[0].value).toEqual(0)
-        });
-
-        it("that fires pieChanged event", function () {
-            expect(ResetFired).toBeTruthy()
-        })
+    it("with correct input less than angStart", function () {
+        pm.setAngleEnd(items[0], 2);
+        expect(items[0].angEnd).toEqual(2)
     });
 
-    describe("A spec testing PieChartHistory", function () {
-        var pm = new PieChartModel([
+
+    it("with zero angle input", function () {
+        pm.setAngleEnd(items[0], 0);
+        expect(items[0].angEnd).toEqual(0)
+    });
+
+    it("that fires pieChanged event", function () {
+        pm.setAngleEnd(items[0], 0);
+        expect(fired).toBeTruthy()
+    })
+});
+
+xdescribe("A spec testing PieChartModel changeStrategy() function", function () {
+    var pmToChgStr = new PieChartModel([
+        {name: "a", value: 43},
+        {name: "b", value: 38},
+        {name: "c", value: 15}
+    ]);
+
+    it("with null input", function () {
+        expect(function () {pmToChgStr.changeStrategy(null)}).toThrow()
+        expect(pmToChgStr._changeStrategy).not.toBeNull();
+    });
+
+    var MyStrategy;
+
+    it("with strategy !setValue input", function () {
+        expect(function () {
+            pmToChgStr.changeStrategy(MyStrategy)
+        }).toThrow();
+    });
+
+    var newPm = new PieChartModel([
+        {name: "a", value: 43},
+        {name: "b", value: 38},
+        {name: "c", value: 15}
+    ]);
+    newPm.changeStrategy(ChangeNeighborsStrategy)
+    it("change to ChangeNeighborsStrategy", function () {
+        expect(newPm._changeStrategy).toBe(ChangeNeighborsStrategy);
+    })
+
+    var newPmToChgStr = new PieChartModel([
+        {name: "a", value: 43},
+        {name: "b", value: 38},
+        {name: "c", value: 15}
+    ]);
+    newPmToChgStr.changeStrategy(ChangeNeighborsStrategy)
+    newPmToChgStr.changeStrategy(ChangeAllStrategy)
+    it("change to ChangeAllStrategy", function () {
+        expect(newPmToChgStr._changeStrategy).toBe(ChangeAllStrategy);
+    })
+});
+
+//xdescribe("A spec testing PieChartModel remove() function", function () {
+//
+//    var pmRm = new PieChartModel([
+//        {name: "a", value: 43},
+//        {name: "b", value: 38},
+//        {name: "c", value: 15}
+//    ]);
+//    var pieChanged;
+//    $(pmRm).on('pieChanged', function () {
+//        pieChanged = true;
+//    });
+//    var pmRmItems = pmRm.getItems();
+//    pmRm.remove(pmRmItems[0]);
+//
+//    it("remove() sets deleted flag properly", function () {
+//        expect(pmRmItems[0].deleted).toBeTruthy()
+//    });
+//
+//    it("remove() sets modelItem deleted flag properly", function () {
+//        expect(pmRmItems[0].modelItem.deleted).toBeTruthy()
+//    });
+//
+//    pmRm.remove(pmRmItems[0]);
+//    it("remove() doesn't change anything if element was already deleted", function () {
+//        expect(pmRmItems[0].deleted).toBeTruthy()
+//    });
+//
+//    it("remove() doesn't delete element literally", function () {
+//        expect(pmRmItems[0]).toBeDefined();
+//    });
+//
+//    it("that fires pieChanged event", function () {
+//        expect(pieChanged).toBeTruthy()
+//    })
+//});
+
+//xdescribe("A spec testing PieChartModel reset() function", function () {
+//
+//    var pmRs = new PieChartModel([
+//        {name: "a", value: 43},
+//        {name: "b", value: 38},
+//        {name: "c", value: 15}
+//    ]);
+//    var pmRsItems = pmRs.getItems();
+//    var ResetFired;
+//    pmRs.remove(pmRsItems[0]);
+//    $(pmRs).on('pieChanged', function () {
+//        ResetFired = true;
+//    });
+//    pmRs.reset();
+//
+//    var sum = pmRsItems[1].value + pmRsItems[2].value
+//
+//    it("reset() sets all items' values to equal values", function () {
+//        expect(pmRsItems[1].value).toEqual(pmRsItems[2].value)
+//    });
+//
+//    it("reset() sets all items' values to equal values with sum 100", function () {
+//        expect(sum).toEqual(100)
+//    });
+//
+//    var pmSE = new PieChartModel([
+//        {name: "a", value: 43}
+//    ]);
+//    var pmSEitems = pmSE.getItems();
+//    pmSE.remove(pmSEitems[0]);
+//    pmSE.reset()
+//    it("reset() does nothing to single element that was deleted", function () {
+//        expect(pmSEitems[0].value).toEqual(0)
+//    });
+//
+//    it("that fires pieChanged event", function () {
+//        expect(ResetFired).toBeTruthy()
+//    })
+//});
+
+xdescribe("A spec testing PieChartHistory", function () {
+    var pm, history;
+    var Fired;
+    var firedOnUndo, lengthBeforeUndo;
+    var canUndo1, canUndo2;
+
+    beforeEach(function () {
+        pm = new PieChartModel([
             {name: "a", value: 20},
             {name: "b", value: 20},
             {name: "c", value: 20},
             {name: "d", value: 20},
             {name: "e", value: 20}
         ]);
-        var history = new PieChartHistory(pm);
-        var Fired;
+        history = new PieChartHistory(pm);
         $(history).on('historyUpdated', function () {
             Fired = true;
         });
-        var canUndo1 = history.canUndo();
+    });
+
+    afterEach(function () {
+        pm = 0;
+        history = 0;
+    });
+
+    it("canUndo() on empty history", function () {
+        canUndo1 = history.canUndo();
         pm.setAngleEnd(pm.items[0], Math.PI / 2);
-        var canUndo2 = history.canUndo();
+        expect(canUndo1).toBeFalsy()
+    });
+    it("canUndo() on non-empty history", function () {
+        canUndo1 = history.canUndo();
+        pm.setAngleEnd(pm.items[0], Math.PI / 2);
+        canUndo2 = history.canUndo();
+        expect(canUndo2).toBeTruthy()
+    });
 
-        it("canUndo() on empty history", function () {
-            expect(canUndo1).toBeFalsy()
-        });
-        it("canUndo() on non-empty history", function () {
-            expect(canUndo2).toBeTruthy()
-        });
+    it("getHistoryLength() on non-empty history", function () {
+        pm.setAngleEnd(pm.items[0], Math.PI / 2);
+        lengthBeforeUndo = history.getHistoryLength();
+        expect(lengthBeforeUndo).toBeGreaterThan(0)
+    });
 
-        lengthBeforeUndo = history.getHistoryLength()
-        it("getHistoryLength() on non-empty history", function () {
-            expect(lengthBeforeUndo).toBeGreaterThan(0)
-        });
+    it("getHistoryLength() on empty history", function () {
+        pm.setAngleEnd(pm.items[0], Math.PI / 2);
+        history.undo();
+        var lengthAfterUndo = history.getHistoryLength();
 
-        var firedOnUndo;
+        expect(lengthAfterUndo).toEqual(0)
+    });
+
+    it("undo() revert state test", function () {
+        pm.setAngleEnd(pm.items[0], Math.PI / 2);
+        history.undo();
+
+        expect(pm.items[0].angEnd).toEqual(20 * (2 * Math.PI / 100))
+    });
+
+    it("undo() fires historyUpdated event", function () {
         $(history).on('historyUpdated', function () {
             firedOnUndo = true;
         });
+        pm.setAngleEnd(pm.items[0], Math.PI / 2);
         history.undo();
-
-        lengthAfterUndo = history.getHistoryLength()
-        it("getHistoryLength() on empty history", function () {
-            expect(lengthAfterUndo).toEqual(0)
-        });
-
-        it("undo() revert state test", function () {
-            expect(pm.items[0].angEnd).toEqual(20 * (2 * Math.PI / 100))
-        });
-
-        it("undo() fires historyUpdated event", function () {
-            expect(firedOnUndo).toBeTruthy()
-        });
-
-        it("disable()", function () {
-            var pm = new PieChartModel([
-                {name: "a", value: 20},
-                {name: "b", value: 20},
-                {name: "c", value: 20},
-                {name: "d", value: 20},
-                {name: "e", value: 20}
-            ]);
-            var history = new PieChartHistory(pm);
-            history.disable();
-            expect(history.historyEnabled).toBeFalsy()
-        });
-
-        it("enableAndUpdate() enables history", function () {
-            var pm = new PieChartModel([
-                {name: "a", value: 20},
-                {name: "b", value: 20},
-                {name: "c", value: 20},
-                {name: "d", value: 20},
-                {name: "e", value: 20}
-            ]);
-            var history = new PieChartHistory(pm);
-            history.disable();
-            history.enableAndUpdate();
-            expect(history.historyEnabled).toBeTruthy()
-        });
-
-        it("enableAndUpdate() fires historyUpdated event", function () {
-            var pm = new PieChartModel([
-                {name: "a", value: 20},
-                {name: "b", value: 20},
-                {name: "c", value: 20},
-                {name: "d", value: 20},
-                {name: "e", value: 20}
-            ]);
-            var history = new PieChartHistory(pm);
-            var Fired = false;
-            $(history).on('historyUpdated', function () {
-                Fired = true;
-            });
-            history.disable();
-            pm.setAngleEnd(pm.items[0], Math.PI / 2);
-            history.enableAndUpdate();
-            expect(Fired).toBeTruthy()
-        });
-
-        it("that fires historyUpdated event", function () {
-            expect(Fired).toBeTruthy()
-        });
+        expect(firedOnUndo).toBeTruthy()
     });
+
+    it("disable()", function () {
+        history.disable();
+        expect(history.historyEnabled).toBeFalsy()
+    });
+
+    it("enableAndUpdate() enables history", function () {
+        history.disable();
+        history.enableAndUpdate();
+        expect(history.historyEnabled).toBeTruthy()
+    });
+
+    it("enableAndUpdate() fires historyUpdated event", function () {
+        var Fired = false;
+        $(history).on('historyUpdated', function () {
+            Fired = true;
+        });
+        history.disable();
+        pm.setAngleEnd(pm.items[0], Math.PI / 2);
+        history.enableAndUpdate();
+        expect(Fired).toBeTruthy()
+    });
+
+    it("that fires historyUpdated event", function () {
+        expect(Fired).toBeTruthy()
+    });
+});

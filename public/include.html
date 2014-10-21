@@ -8,10 +8,12 @@
 //            var pm = new PieChartModel([{name: "a", value: 50}, {name: "b", value: 50}]);
             var pm = new PieChartModel([
                 {name: "a", value: 43},
-                {name: "b", value: 38}
+                {name: "b", value: 38},
+                {name: "c", value: 15}
             ]);
             var items = pm.getItems();
-            console.log(items);
+            pm.setAngleEnd(items[1], 3);
+//            console.log(items)
             return;
             $(pm).on("pieChanged", function() {
                 $(".result").html($(".result").html() + "<br> Pie model changed event");

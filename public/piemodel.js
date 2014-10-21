@@ -47,7 +47,9 @@
             }
             item.value = newValue;
             allItems.slice(1).forEach(function (i) {
+                console.log(i)
                 i.value = i.value * changeFactor;
+                console.log("i.value " + i.value)
             });
         }
     };
